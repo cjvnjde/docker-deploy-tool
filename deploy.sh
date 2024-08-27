@@ -158,18 +158,14 @@ fi
 # ========================================
 # Starting New Container
 # ========================================
-if [[ -z ${PORT} ]]; then
-  echo "Starting container"
-  docker run -d --restart unless-stopped \
-    --name "${DOCKER_NAME}_${TIMESTAMP}" \
-    "$DOCKER_NAME:$TIMESTAMP" || { echo "Failed to start container"; exit 1; }
-else
-  echo "Starting container on port ${PORT}"
-  docker run -d --restart unless-stopped \
-    -p "$PORT:$CONTAINER_PORT" \
-    --name "${DOCKER_NAME}_${TIMESTAMP}" \
-    "$DOCKER_NAME:$TIMESTAMP" || { echo "Failed to start container on port $PORT"; exit 1; }
+docker_run_cmd="docker run -d --restart unless-stopped --name ${DOCKER_NAME}_${TIMESTAMP}"
+
+if [[ -n ${PORT} ]]; then
+  echo "Starting container on port $PORT"
+  docker_run_cmd+=" -p $PORT:$CONTAINER_PORT"
 fi
+
+eval $docker_run_cmd "\"$DOCKER_NAME:$TIMESTAMP\"" || { echo "Failed to start container"; exit 1; }
 
 # ========================================
 # Cleaning Old Releases and Docker Images
